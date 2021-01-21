@@ -1,28 +1,36 @@
+require('dotenv').config()
 const express = require('express');
 const app = express();
 const DBL = require('@top-gg/sdk');
-const cors = require('cors');
-const User = require('../database/schemas/User');
-const webhook = new DBL.Webhook('6u4rjhtdggj964trhum'); // random string because yes
+const mongoose = require('mongoose')
+const User = require('./database/schemas/User');
+const webhook = new DBL.Webhook(process.env.DBL_STRING); // random string because yes
 
 const port = 5001 || 5003 // available ports for Slayer's Raspberry
 
-module.exports = async bot => {
-    app.use("/api/", require("./routes/api")(bot));
+if (!process.env.MONGODB_URI) throw Error('MONGODB_URI environment variable required');
+if (!process.env.DBL_STRING) throw Error('DBL_STRING environment variable required');
 
-    app.post('/dblwebhook', webhook.middleware(), async (req, res) => {
-        let amount = req.vote.isWeekend ? 2000 : 1000
+mongoose.connect(process.env.MONGODB_URI, {
+    useCreateIndex: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(console.log('[INFO] Mongoose connected')).catch(err => {
+    console.log('[ERROR]' + err)
+})
 
-        if (req.vote.type === 'test') return console.log(req.vote);
+app.post('/dblwebhook', webhook.middleware(), async (req, res) => {
+    let amount = req.vote.isWeekend ? 2000 : 1000
 
-        const userSettings = await User.findOne({ discordId: req.vote.user });
+    if (req.vote.type === 'test') console.log(req.vote);
 
-        console.log(req.vote.user)
+    const userSettings = await User.findOne({ discordId: req.vote.user });
 
-        if (!userSettings) return User.create({ discordId: req.vote.user, wallet: amount });
-        await userSettings.updateOne({ wallet: userSettings.wallet + amount || amount })
-    });
+    console.log(req.vote.user)
 
-    app.listen(port);
-    process.send({ name: "info", msg: `Webserver running on ${port}` });
-}
+    if (!userSettings) return User.create({ discordId: req.vote.user, wallet: amount });
+    await userSettings.updateOne({ wallet: userSettings.wallet + amount || amount })
+});
+
+app.listen(port);
+console.log(`[INFO] Webserver running on ${port}`)
