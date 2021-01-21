@@ -28,8 +28,8 @@ app.post('/dblwebhook', webhook.middleware(), async (req, res) => {
 
     console.log(req.vote.user)
 
-    if (!userSettings) return User.create({ discordId: req.vote.user, wallet: amount });
-    await userSettings.updateOne({ wallet: userSettings.wallet + amount || amount })
+    if (!userSettings) return User.create({ discordId: req.vote.user, wallet: amount, votes: 1, lastVoted: Date.now() });
+    await userSettings.updateOne({ wallet: userSettings.wallet + amount || amount, votes: userSettings.votes + 1 || 1, lastVoted: Date.now() })
 });
 
 app.listen(port);

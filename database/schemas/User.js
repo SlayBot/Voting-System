@@ -14,9 +14,8 @@ const userSchema = mongoose.Schema({
     lastRep: Number,
     lastWork: Number,
     lastCrime: Number,
-    lastVotedDBL: Number,
-    bioText: String,
-    rep: Number
+    lastVoted: Number,
+    votes: Number
 });
 
 
