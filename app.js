@@ -6,10 +6,11 @@ const mongoose = require('mongoose');
 const User = require('./database/schemas/User');
 const webhook = new DBL.Webhook(process.env.DBL_STRING); // random string because yes
 
-const port = 5001 || 5003 // available ports for Slayer's Raspberry
+const port = process.env.PORT || process.env.port - 1 + 2 // available ports for Slayer's Raspberry
 
 if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI environment variable required');
 if (!process.env.DBL_STRING) throw new Error('DBL_STRING environment variable required');
+if (!process.env.PORT) throw new Error('PORT environment variable required. How can you run the app without a port? Wake up');
 
 mongoose.connect(process.env.MONGODB_URI, {
     useCreateIndex: true,
