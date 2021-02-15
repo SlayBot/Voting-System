@@ -22,17 +22,15 @@ app.post('/dblwebhook', webhook.middleware(), async (req) => {
     let credits = req.vote.isWeekend ? 2000 : 1000;
 
     const apiUser = await fetch(`https://discord.com/api/v8/users/${req.vote.user}`, {
-        headers: {
-          Authorization: `Bot ${process.env.TOKEN}`
-        }
+        headers: { Authorization: `Bot ${process.env.TOKEN}`}
     }).then(res => res.json());
 
     logger.log(`${apiUser.username} (${req.vote.user}) just voted ${process.env.BOT_NAME || 'your bot'}! Rewarded the user with $${credits}!`, { color: 'green', tags: ['DBL', 'DATABASE'] })
 
-    const userSettings = await User.findOne({ discordId: req.vote.user });
-    if (!userSettings) return User.create({ discordId: req.vote.user, wallet: credits, votes: 1, lastVoted: Date.now() });
+    const userSettings = await User.findById(req.vote.user)
+    if (!userSettings) return User.create({ _id: req.vote.user, wallet: credits, votes: 1, lastVoted: Date.now() });
 
-    await userSettings.updateOne({ wallet: userSettings.wallet + credits || credits,  votes: userSettings.votes + 1 || 1, lastVoted: Date.now()});
+    await userSettings.updateOne({ wallet: userSettings.wallet + credits || credits,  votes: userSettings.votes + 1 || 1, lastVoted: Date.now() });
 });
 
 app.listen(port, () => {
