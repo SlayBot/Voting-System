@@ -29,11 +29,6 @@ app.post('/dblwebhook', webhook.middleware(), async (req) => {
 
     logger.log(`${apiUser.username} (${req.vote.user}) just voted ${process.env.BOT_NAME || 'your bot'}! Rewarded the user with $${credits}!`, { color: 'green', tags: ['DBL', 'DATABASE'] })
 
-    const userSettings = await User.findById(req.vote.user)
-    if (!userSettings) return User.create({ _id: req.vote.user, wallet: credits, votes: 1, lastVoted: Date.now() });
-
-    await userSettings.updateOne({ wallet: userSettings.wallet + credits || credits,  votes: userSettings.votes + 1 || 1, lastVoted: Date.now() });
-
     const msg = new DiscordWebhook.MessageBuilder()
         .setName(process.env.BOT_NAME || 'Voting System')
         .setAvatar('https://cdn.slaybot.xyz/static/avatar.png')
@@ -41,6 +36,11 @@ app.post('/dblwebhook', webhook.middleware(), async (req) => {
         .setTitle(`${apiUser.username} voted SlayBot`)
         .setDescription(`Thank you **${apiUser.username}#${apiUser.discriminator}** (${apiUser.id}) for voting **${process.env.BOT_NAME}**!\nYou have been rewarded with $${credits} to your wallet`)
     Hook.send(msg);
+
+    const userSettings = await User.findById(req.vote.user)
+    if (!userSettings) return User.create({ _id: req.vote.user, wallet: credits, votes: 1, lastVoted: Date.now() });
+
+    await userSettings.updateOne({ wallet: userSettings.wallet + credits || credits,  votes: userSettings.votes + 1 || 1, lastVoted: Date.now() });
 });
 
 app.listen(port, () => {
