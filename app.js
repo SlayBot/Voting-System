@@ -7,6 +7,8 @@ const User = require('./database/schemas/User');
 const webhook = new DBL.Webhook(process.env.DBL_STRING);
 const logger = require('./logger');
 const fetch = require('node-fetch');
+const DiscordWebhook = require('webhook-discord');
+const Hook = new DiscordWebhook.Webhook(process.env.DISCORD_WEBHOOK_URL)
 
 const port = process.env.PORT || process.env.port - 1 + 2
 
@@ -31,6 +33,14 @@ app.post('/dblwebhook', webhook.middleware(), async (req) => {
     if (!userSettings) return User.create({ _id: req.vote.user, wallet: credits, votes: 1, lastVoted: Date.now() });
 
     await userSettings.updateOne({ wallet: userSettings.wallet + credits || credits,  votes: userSettings.votes + 1 || 1, lastVoted: Date.now() });
+
+    const msg = new DiscordWebhook.MessageBuilder()
+        .setName(process.env.BOT_NAME || 'Voting System')
+        .setAvatar('https://cdn.slaybot.xyz/static/avatar.png')
+        .setColor('#7289DA')
+        .setTitle(`${apiUser.username} voted SlayBot`)
+        .setDescription(`Thank you **${apiUser.username}#${apiUser.discriminator}** (${apiUser.id}) for voting **${process.env.BOT_NAME}**!\nYou have been rewarded with $${credits} to your wallet`)
+    Hook.send(msg);
 });
 
 app.listen(port, () => {
