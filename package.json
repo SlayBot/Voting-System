@@ -11,7 +11,7 @@
   "author": "GhostSlayer",
   "license": "ISC",
   "dependencies": {
-    "@top-gg/sdk": "^3.0.6",
+    "@top-gg/sdk": "^3.0.7",
     "chalk": "^4.1.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
