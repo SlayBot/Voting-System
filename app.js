@@ -17,7 +17,6 @@ if (!process.env.DBL_STRING) throw new Error('DBL_STRING environment variable re
 if (!process.env.TOKEN) throw new Error('TOKEN environment variable required');
 if (!process.env.PORT) throw new Error('PORT environment variable required. How can you run the app without a port? Wake up');
 
-
 mongoose.connection.on('connected', () => logger.log('Mongoose connected', { color: 'green', tags: ['INFO', 'DATABASE'] }))
 
 app.post('/dblwebhook', webhook.middleware(), async (req) => {
@@ -31,14 +30,14 @@ app.post('/dblwebhook', webhook.middleware(), async (req) => {
 
     const msg = new DiscordWebhook.MessageBuilder()
         .setName(process.env.BOT_NAME || 'Voting System')
-        .setAvatar('https://cdn.slaybot.xyz/static/avatar.png')
+        .setAvatar('https://res.cloudinary.com/slaybot/image/upload/v1614951440/4c413f886725571f2af26e547030dd1a_avpqwm.png')
         .setColor('#7289DA')
         .setTitle(`${apiUser.username} voted SlayBot`)
         .setDescription(`Thank you **${apiUser.username}#${apiUser.discriminator}** (${apiUser.id}) for voting **${process.env.BOT_NAME}**!\nYou have been rewarded with $${credits} to your wallet`)
     Hook.send(msg);
 
-    const userSettings = await User.findById(req.vote.user)
-    if (!userSettings) return User.create({ _id: req.vote.user, wallet: credits, votes: 1, lastVoted: Date.now() });
+    const userSettings = await User.findOne({ discordId: req.vote.user })
+    if (!userSettings) return User.create({ discordId: req.vote.user, wallet: credits, votes: 1, lastVoted: Date.now() });
 
     await userSettings.updateOne({ wallet: userSettings.wallet + credits || credits,  votes: userSettings.votes + 1 || 1, lastVoted: Date.now() });
 });
