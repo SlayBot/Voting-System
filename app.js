@@ -39,7 +39,7 @@ app.post('/dblwebhook', webhook.middleware(), async (req) => {
     const userSettings = await User.findOne({ discordId: req.vote.user })
     if (!userSettings) return User.create({ discordId: req.vote.user, wallet: credits, votes: 1, lastVoted: Date.now() });
 
-    await userSettings.updateOne({ wallet: userSettings.wallet + credits || credits,  votes: userSettings.votes + 1 || 1, lastVoted: Date.now() });
+    await userSettings.updateOne({ wallet: parseInt(userSettings.wallet) + credits || credits,  votes: userSettings.votes + 1 || 1, lastVoted: Date.now() });
 });
 
 app.listen(port, () => {
