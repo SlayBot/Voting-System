@@ -36,10 +36,7 @@ app.post('/dblwebhook', webhook.middleware(), async (req) => {
         .setDescription(`Thank you **${apiUser.username}#${apiUser.discriminator}** (${apiUser.id}) for voting **${process.env.BOT_NAME}**!\nYou have been rewarded with $${credits} to your wallet`)
     Hook.send(msg);
 
-    const userSettings = await User.findOne({ discordId: req.vote.user })
-    if (!userSettings) return User.create({ discordId: req.vote.user, wallet: credits, votes: 1, lastVoted: Date.now() });
-
-    await userSettings.updateOne({ wallet: parseInt(userSettings.wallet) + credits || credits,  votes: userSettings.votes + 1 || 1, lastVoted: Date.now() });
+    await User.findOneAndUpdate({ discordId: req.vote.user }, { wallet: parseInt(userSettings.wallet) + credits || credits,  votes: userSettings.votes + 1 || 1, lastVoted: Date.now() }, { upsert: true })
 });
 
 app.listen(port, () => {
